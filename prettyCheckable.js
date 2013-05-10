@@ -25,56 +25,24 @@
       this.init();
     }
 
-    function addCheckableEvents(element) {
-
-      element.find('a, label').on('touchstart click', function(e){
-
-        e.preventDefault();
-
-        var clickedParent = $(this).closest('.clearfix');
-        var input = clickedParent.find('input');
-        var fakeCheckable = clickedParent.find('a');
-
-        if (input.prop('disabled') === true) {
-          console.log('sdf');
-          return;
-
-        }
-
-        if (input.prop('type') === 'radio') {
-
-          $('input[name="' + input.attr('name') + '"]').each(function(index, el){
-
-            $(el).prop('checked', false).parent().find('a').removeClass('checked');
-
-          });
-
-        }
-
-        if (input.prop('checked')) {
-
-            input.prop('checked', false).change();
-
-        } else {
-
-            input.prop('checked', true).change();
-
-        }
-
-        fakeCheckable.toggleClass('checked');
-
-      });
-
-      element.find('a').on('keyup', function(e){
-
-        if (e.keyCode === 32) {
-
-          $(this).click();
-
-        }
-
-      });
-
+    function addCheckableEvents(input){
+        input.on('change', function(){
+            input.siblings('a').toggleClass('checked', this.checked);
+        });
+        input.siblings('a, label')
+            .on('click',  function(event){
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                input.trigger('click');
+                if (input.attr('type') == 'radio') {
+                    $('input[name="' + input.attr('name') + '"]').not(input).change();
+                }
+            })
+            .on('keyup', function(e){
+                if (e.keyCode === 32){
+                    $(this).click();
+                }
+            });
     }
 
     Plugin.prototype.init = function () {
@@ -116,7 +84,7 @@
       }
 
       el.parent().append(dom.join('\n'));
-      addCheckableEvents(el.parent());
+      addCheckableEvents(el);
 
     };
 
